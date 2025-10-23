@@ -9,6 +9,7 @@ import {UserRoles} from './node_modules/pigallery2-extension-kit/lib/common/enti
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as _ from './node_modules/lodash';
+import * as fs from 'fs';
 
 // Importing packages that are available in the main app (listed in the packages.json in pigallery2)
 import {Column, Entity, Index, PrimaryGeneratedColumn, Repository} from 'typeorm';
@@ -97,8 +98,8 @@ export const init = async (extension: IExtensionObject<TestConfig>): Promise<voi
     reloadContent: true,
     minUserRole: UserRoles.User,
     popup: {
-      header: 'Deleting from DB',
-      body: 'Are you sure?</b>This will delete the photo from the DB only. Next indexing will readd this photo.',
+      header: 'Deleting from Gallery',
+      body: 'WARNING: this will delete the photo from gallery. No going back!!',
       buttonString: 'Delete',
       customFields: [
         {
@@ -111,6 +112,9 @@ export const init = async (extension: IExtensionObject<TestConfig>): Promise<voi
       ]
     }
   }, async (params: ParamsDictionary, body: any, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => {
+    const filePath = `${extension.paths.ImageFolder}/${media.directory.path}${media.directory.name}/${media.name}`
+    console.log(`deleting media item: ${filePath}`);
+    fs.unlinkSync(filePath);
     await repository.delete(media.id);
   });
 
